@@ -10,6 +10,7 @@ A high-fidelity command center for emergency medical routing with real-time weat
 - Interactive map powered by React-Leaflet with dark CartoDB tiles
 - Real-time weather integration via Open-Meteo API
 - Live traffic data from TomTom Routing API
+- **AI Advisor**: Natural language route explanations powered by OpenAI GPT
 - Life-Cost Index calculation: `LC = (Time × Weather) + Severity`
 - Hero-sized map (80% viewport) with floating Active Cargo card
 
@@ -33,7 +34,8 @@ A high-fidelity command center for emergency medical routing with real-time weat
 - **Styling**: Tailwind CSS v4
 - **Mapping**: React-Leaflet + Leaflet
 - **Icons**: Lucide React
-- **APIs**: Open-Meteo (weather), TomTom (traffic)
+- **AI**: OpenAI GPT-3.5-turbo
+- **APIs**: Open-Meteo (weather), TomTom (traffic), OpenAI (route explanations)
 
 ## Getting Started
 
@@ -60,13 +62,24 @@ A high-fidelity command center for emergency medical routing with real-time weat
    Create a `.env.local` file in the project root:
    ```env
    NEXT_PUBLIC_TOMTOM_KEY=your_tomtom_api_key_here
+   NEXT_PUBLIC_OPENAI_API_KEY=your_openai_api_key_here
    ```
 
-   > **Getting a TomTom API Key:**
+   > **Getting API Keys:**
+   > 
+   > **TomTom API Key (for traffic data):**
    > 1. Visit [TomTom Developer Portal](https://developer.tomtom.com/)
    > 2. Sign up for a free account
    > 3. Create a new API key in the dashboard
    > 4. Copy the key to your `.env.local` file
+   >
+   > **OpenAI API Key (for AI route explanations):**
+   > 1. Visit [OpenAI Platform](https://platform.openai.com/api-keys)
+   > 2. Sign up or log in
+   > 3. Create a new API key
+   > 4. Copy the key to your `.env.local` file
+   > 
+   > Note: The AI Advisor will use fallback explanations if no OpenAI key is configured.
 
 4. **Run the development server**
    ```bash
