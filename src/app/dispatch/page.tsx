@@ -6,6 +6,7 @@ import { fetchWeather, fetchTraffic } from '@/lib/api';
 import { ACTIVE_SHIPMENTS, HOSPITALS, type Hospital, type Shipment } from '@/lib/cargo-data';
 import { Activity, Cloud, Navigation, Package, Building2 } from 'lucide-react';
 import LifeCostCard from '@/components/LifeCostCard';
+import AIAdvisor from '@/components/AIAdvisor';
 import LiveClock from '@/components/LiveClock';
 import Navbar from '@/components/Navbar';
 
@@ -137,6 +138,15 @@ export default function DispatchPage() {
                                 time={parseInt(criticalShipment.estArrival)}
                                 weather={weather.impactFactor}
                                 severity={criticalShipment.severity}
+                            />
+                        )}
+
+                        {/* AI Advisor Overlay */}
+                        {criticalShipment && (
+                            <AIAdvisor
+                                shipment={criticalShipment}
+                                weatherImpact={weather.impactFactor}
+                                congestionLevel={traffic.congestionLevel}
                             />
                         )}
                     </div>
