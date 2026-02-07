@@ -8,6 +8,7 @@ import { Activity, Cloud, Navigation, Package, Building2 } from 'lucide-react';
 import LifeCostCard from '@/components/LifeCostCard';
 import AIAdvisor from '@/components/AIAdvisor';
 import ImpactMetrics from '@/components/ImpactMetrics';
+import Onboarding from '@/components/Onboarding';
 import LiveClock from '@/components/LiveClock';
 import Navbar from '@/components/Navbar';
 
@@ -135,27 +136,33 @@ export default function DispatchPage() {
 
                         {/* Life-Cost Card Overlay */}
                         {criticalShipment && (
-                            <LifeCostCard
-                                time={parseInt(criticalShipment.estArrival)}
-                                weather={weather.impactFactor}
-                                severity={criticalShipment.severity}
-                            />
+                            <div className="life-cost-card">
+                                <LifeCostCard
+                                    time={parseInt(criticalShipment.estArrival)}
+                                    weather={weather.impactFactor}
+                                    severity={criticalShipment.severity}
+                                />
+                            </div>
                         )}
 
                         {/* AI Advisor Overlay */}
                         {criticalShipment && (
-                            <AIAdvisor
-                                shipment={criticalShipment}
-                                weatherImpact={weather.impactFactor}
-                                congestionLevel={traffic.congestionLevel}
-                            />
+                            <div className="ai-advisor">
+                                <AIAdvisor
+                                    shipment={criticalShipment}
+                                    weatherImpact={weather.impactFactor}
+                                    congestionLevel={traffic.congestionLevel}
+                                />
+                            </div>
                         )}
                     </div>
 
                     {/* Data Dashboard - 30% viewport */}
                     <div className="h-[30vh] bg-[#0a0a0a] border-t border-white/10 overflow-y-auto">
                         {/* Impact Metrics */}
-                        <ImpactMetrics shipments={ACTIVE_SHIPMENTS} />
+                        <div className="impact-metrics">
+                            <ImpactMetrics shipments={ACTIVE_SHIPMENTS} />
+                        </div>
 
                         {/* Stats Row */}
                         <div className="px-6 py-4 border-b border-white/10">
@@ -284,6 +291,9 @@ export default function DispatchPage() {
                         </div>
                     </div>
                 </div>
+
+                {/* Onboarding Tour */}
+                <Onboarding />
             </main>
         </>
     );
