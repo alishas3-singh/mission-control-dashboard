@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, CircleMarker, Polyline, useMap, ZoomControl } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -64,7 +64,7 @@ interface MapViewProps {
     selectedShipment?: string | null;
 }
 
-export default function MapView({
+const MapView = React.memo(function MapView({
     hospitals,
     shipments,
     center,
@@ -84,6 +84,152 @@ export default function MapView({
 
         return () => clearInterval(interval);
     }, []);
+
+    // Memoize hospital markers to prevent recreation on every render
+    const hospitalMarkers = useMemo(() => {
+        return hospitals.map((hospital) => {
+            const isSelected = selectedHospital === hospital.id;
+            const pathOptions = {
+                fillColor: '#00f5ff',
+                fillOpacity: isSelected ? 0.6 : 0.3,
+                color: '#00f5ff',
+                weight: isSelected ? 3 : 2,
+            };
+
+            return (
+                <CircleMarker
+                    key={hospital.id}
+                    center={hospital.position}
+                    radius={isSelected ? 16 : 12}
+                    pathOptions={pathOptions}
+                >
+                    <Popup>
+                        <div className="p-2">
+                            <p className="font-mono text-[10px] text-gray-500 mb-1">{hospital.id}</p>
+                            <p className="font-bold text-sm mb-1">{hospital.name}</p>
+                            <p className="text-xs text-gray-600 mb-1">
+                                Capacity: {hospital.capacity} beds
+                            </p>
+                            <p className="text-xs text-gray-600">
+                                {hospital.specialties.join(', ')}
+                            </p>
+                        </div>
+                    </Popup>
+                </CircleMarker>
+            );
+        });
+    }, [hospitals, selectedHospital]);
+
+    // Memoize shipment routes and markers to prevent recreation on every render
+    const shipmentMarkers = useMemo(() => {
+        return shipments.map((shipment) => {
+            const color = getCargoColor(shipment.cargo.type);
+            const isSelected = selectedShipment === shipment.id;
+
+            // Memoize path options
+            const polylineOptions = {
+                color: color,
+                weight: isSelected ? 4 : 3,
+                opacity: isSelected ? 0.9 : 0.6,
+                dashArray: '10, 10',
+            };
+
+            const originOptions = {
+                fillColor: color,
+                fillOpacity: 0.8,
+                color: 'white',
+                weight: isSelected ? 3 : 2,
+            };
+
+            const destinationOptions = {
+                fillColor: 'white',
+                fillOpacity: 0.9,
+                color: color,
+                weight: isSelected ? 4 : 3,
+            };
+
+            // Memoize midpoint calculation
+            const midpoint: [number, number] = [
+                (shipment.origin.position[0] + shipment.destination.position[0]) / 2,
+                (shipment.origin.position[1] + shipment.destination.position[1]) / 2,
+            ];
+
+            return (
+                <div key={shipment.id}>
+                    {/* Route line */}
+                    <Polyline
+                        positions={[shipment.origin.position, shipment.destination.position]}
+                        pathOptions={polylineOptions}
+                    />
+
+                    {/* Origin marker */}
+                    <CircleMarker
+                        center={shipment.origin.position}
+                        radius={isSelected ? 10 : 8}
+                        pathOptions={originOptions}
+                    >
+                        <Popup>
+                            <div className="p-2">
+                                <p className="text-xs font-mono text-gray-600 mb-1">Origin</p>
+                                <p className="font-bold text-sm">{shipment.origin.name}</p>
+                            </div>
+                        </Popup>
+                    </CircleMarker>
+
+                    {/* Destination marker */}
+                    <CircleMarker
+                        center={shipment.destination.position}
+                        radius={isSelected ? 10 : 8}
+                        pathOptions={destinationOptions}
+                    >
+                        <Popup>
+                            <div className="p-2">
+                                <p className="text-xs font-mono text-gray-600 mb-1">Destination</p>
+                                <p className="font-bold text-sm">{shipment.destination.name}</p>
+                            </div>
+                        </Popup>
+                    </CircleMarker>
+
+                    {/* Shipment info marker (midpoint) */}
+                    <Marker position={midpoint} icon={shipmentIcon}>
+                        <Popup>
+                            <div className="p-2 min-w-[200px]">
+                                <p className="font-mono text-[10px] text-gray-500 mb-1">{shipment.id}</p>
+                                <p className="font-bold text-sm mb-2">{shipment.cargo.description}</p>
+                                <div className="space-y-1 text-xs">
+                                    <div className="flex justify-between">
+                                        <span className="text-gray-600">Type:</span>
+                                        <span className="font-semibold capitalize">{shipment.cargo.type}</span>
+                                    </div>
+                                    <div className="flex justify-between">
+                                        <span className="text-gray-600">Priority:</span>
+                                        <span className={`font-semibold uppercase ${shipment.cargo.priority === 'critical' ? 'text-red-600' :
+                                            shipment.cargo.priority === 'high' ? 'text-orange-600' :
+                                                'text-blue-600'
+                                            }`}>
+                                            {shipment.cargo.priority}
+                                        </span>
+                                    </div>
+                                    <div className="flex justify-between">
+                                        <span className="text-gray-600">ETA:</span>
+                                        <span className="font-semibold">{shipment.estArrival}</span>
+                                    </div>
+                                    <div className="flex justify-between">
+                                        <span className="text-gray-600">Vehicle:</span>
+                                        <span className="font-semibold capitalize">{shipment.vehicleType}</span>
+                                    </div>
+                                    <div className="flex justify-between">
+                                        <span className="text-gray-600">Severity:</span>
+                                        <span className="font-semibold text-red-600">{shipment.severity.toFixed(1)}/10</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </Popup>
+                    </Marker>
+                </div>
+            );
+        });
+    }, [shipments, selectedShipment]);
 
     if (!mounted) {
         return (
@@ -120,137 +266,15 @@ export default function MapView({
                 />
 
                 {/* Hospital Markers */}
-                {hospitals.map((hospital) => (
-                    <CircleMarker
-                        key={hospital.id}
-                        center={hospital.position}
-                        radius={selectedHospital === hospital.id ? 16 : 12}
-                        pathOptions={{
-                            fillColor: selectedHospital === hospital.id ? '#00f5ff' : '#00f5ff',
-                            fillOpacity: selectedHospital === hospital.id ? 0.6 : 0.3,
-                            color: '#00f5ff',
-                            weight: selectedHospital === hospital.id ? 3 : 2,
-                        }}
-                    >
-                        <Popup>
-                            <div className="p-2">
-                                <p className="font-mono text-[10px] text-gray-500 mb-1">{hospital.id}</p>
-                                <p className="font-bold text-sm mb-1">{hospital.name}</p>
-                                <p className="text-xs text-gray-600 mb-1">
-                                    Capacity: {hospital.capacity} beds
-                                </p>
-                                <p className="text-xs text-gray-600">
-                                    {hospital.specialties.join(', ')}
-                                </p>
-                            </div>
-                        </Popup>
-                    </CircleMarker>
-                ))}
+                {hospitalMarkers}
 
                 {/* Shipment Routes and Markers */}
-                {shipments.map((shipment) => {
-                    const color = getCargoColor(shipment.cargo.type);
-                    const isSelected = selectedShipment === shipment.id;
-
-                    return (
-                        <div key={shipment.id}>
-                            {/* Route line */}
-                            <Polyline
-                                positions={[shipment.origin.position, shipment.destination.position]}
-                                pathOptions={{
-                                    color: color,
-                                    weight: isSelected ? 4 : 3,
-                                    opacity: isSelected ? 0.9 : 0.6,
-                                    dashArray: '10, 10',
-                                }}
-                            />
-
-                            {/* Origin marker */}
-                            <CircleMarker
-                                center={shipment.origin.position}
-                                radius={isSelected ? 10 : 8}
-                                pathOptions={{
-                                    fillColor: color,
-                                    fillOpacity: 0.8,
-                                    color: 'white',
-                                    weight: isSelected ? 3 : 2,
-                                }}
-                            >
-                                <Popup>
-                                    <div className="p-2">
-                                        <p className="text-xs font-mono text-gray-600 mb-1">Origin</p>
-                                        <p className="font-bold text-sm">{shipment.origin.name}</p>
-                                    </div>
-                                </Popup>
-                            </CircleMarker>
-
-                            {/* Destination marker */}
-                            <CircleMarker
-                                center={shipment.destination.position}
-                                radius={isSelected ? 10 : 8}
-                                pathOptions={{
-                                    fillColor: 'white',
-                                    fillOpacity: 0.9,
-                                    color: color,
-                                    weight: isSelected ? 4 : 3,
-                                }}
-                            >
-                                <Popup>
-                                    <div className="p-2">
-                                        <p className="text-xs font-mono text-gray-600 mb-1">Destination</p>
-                                        <p className="font-bold text-sm">{shipment.destination.name}</p>
-                                    </div>
-                                </Popup>
-                            </CircleMarker>
-
-                            {/* Shipment info marker (midpoint) */}
-                            <Marker
-                                position={[
-                                    (shipment.origin.position[0] + shipment.destination.position[0]) / 2,
-                                    (shipment.origin.position[1] + shipment.destination.position[1]) / 2,
-                                ]}
-                                icon={shipmentIcon}
-                            >
-                                <Popup>
-                                    <div className="p-2 min-w-[200px]">
-                                        <p className="font-mono text-[10px] text-gray-500 mb-1">{shipment.id}</p>
-                                        <p className="font-bold text-sm mb-2">{shipment.cargo.description}</p>
-                                        <div className="space-y-1 text-xs">
-                                            <div className="flex justify-between">
-                                                <span className="text-gray-600">Type:</span>
-                                                <span className="font-semibold capitalize">{shipment.cargo.type}</span>
-                                            </div>
-                                            <div className="flex justify-between">
-                                                <span className="text-gray-600">Priority:</span>
-                                                <span className={`font-semibold uppercase ${shipment.cargo.priority === 'critical' ? 'text-red-600' :
-                                                    shipment.cargo.priority === 'high' ? 'text-orange-600' :
-                                                        'text-blue-600'
-                                                    }`}>
-                                                    {shipment.cargo.priority}
-                                                </span>
-                                            </div>
-                                            <div className="flex justify-between">
-                                                <span className="text-gray-600">ETA:</span>
-                                                <span className="font-semibold">{shipment.estArrival}</span>
-                                            </div>
-                                            <div className="flex justify-between">
-                                                <span className="text-gray-600">Vehicle:</span>
-                                                <span className="font-semibold capitalize">{shipment.vehicleType}</span>
-                                            </div>
-                                            <div className="flex justify-between">
-                                                <span className="text-gray-600">Severity:</span>
-                                                <span className="font-semibold text-red-600">{shipment.severity.toFixed(1)}/10</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </Popup>
-                            </Marker>
-                        </div>
-                    );
-                })}
+                {shipmentMarkers}
             </MapContainer>
 
             <LiveGridIndicator />
         </div>
     );
-}
+});
+
+export default MapView;
