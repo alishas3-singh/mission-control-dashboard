@@ -17,6 +17,18 @@ interface TrafficData {
  * Location: Seattle, WA (47.6062, -122.3321)
  */
 export async function fetchWeather(): Promise<WeatherData> {
+    // Check if mock data mode is enabled (for offline demos)
+    const useMockData = process.env.NEXT_PUBLIC_USE_MOCK_DATA === 'true';
+
+    if (useMockData) {
+        console.log('[DEMO MODE] Using mock weather data');
+        return {
+            temperature: 15,
+            weathercode: 61, // Rain
+            impactFactor: 0.8, // High impact from precipitation
+        };
+    }
+
     try {
         const response = await fetch(
             'https://api.open-meteo.com/v1/forecast?latitude=47.6062&longitude=-122.3321&current=temperature_2m,weathercode'
@@ -63,8 +75,19 @@ export async function fetchWeather(): Promise<WeatherData> {
  */
 export async function fetchTraffic(lat: number = 47.6062, lon: number = -122.3321): Promise<TrafficData> {
     const apiKey = process.env.NEXT_PUBLIC_TOMTOM_KEY;
+    const useMockData = process.env.NEXT_PUBLIC_USE_MOCK_DATA === 'true';
 
-    if (!apiKey || apiKey === 'your_tomtom_api_key_here') {
+    // Mock data mode for offline demos
+    if (useMockData) {
+        console.log('[DEMO MODE] Using mock traffic data');
+        return {
+            currentSpeed: 45,
+            freeFlowSpeed: 60,
+            congestionLevel: 0.25, // Moderate traffic
+        };
+    }
+
+    if (!apiKey || apiKey === 'your_tomtom_api_key_here' || apiKey === 'demo_mode') {
         console.warn('TomTom API key not configured, using mock data');
         return {
             currentSpeed: 45,
