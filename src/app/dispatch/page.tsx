@@ -7,6 +7,7 @@ import { ACTIVE_SHIPMENTS, HOSPITALS, type Hospital, type Shipment } from '@/lib
 import { Activity, Cloud, Navigation, Package, Building2 } from 'lucide-react';
 import LifeCostCard from '@/components/LifeCostCard';
 import AIAdvisor from '@/components/AIAdvisor';
+import ImpactMetrics from '@/components/ImpactMetrics';
 import LiveClock from '@/components/LiveClock';
 import Navbar from '@/components/Navbar';
 
@@ -153,6 +154,9 @@ export default function DispatchPage() {
 
                     {/* Data Dashboard - 30% viewport */}
                     <div className="h-[30vh] bg-[#0a0a0a] border-t border-white/10 overflow-y-auto">
+                        {/* Impact Metrics */}
+                        <ImpactMetrics shipments={ACTIVE_SHIPMENTS} />
+
                         {/* Stats Row */}
                         <div className="px-6 py-4 border-b border-white/10">
                             <div className="max-w-7xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-4">

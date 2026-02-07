@@ -185,3 +185,55 @@ export function getVehicleIcon(type: Shipment['vehicleType']): string {
             return '🚑';
     }
 }
+
+// Impact Metrics Calculations
+
+/**
+ * Calculate estimated lives saved based on critical deliveries
+ * Critical (severity >= 9): 1.0 life saved
+ * High (severity >= 7): 0.5 lives saved
+ */
+export function calculateLivesSaved(shipments: Shipment[]): number {
+    const deliveredShipments = shipments.filter(s => s.status === 'delivered' || s.status === 'in-transit');
+
+    return deliveredShipments.reduce((total, shipment) => {
+        if (shipment.severity >= 9) return total + 1.0;
+        if (shipment.severity >= 7) return total + 0.5;
+        return total;
+    }, 0);
+}
+
+/**
+ * Calculate total time saved this week through optimized routing
+ * Assumption: AI optimization saves 15-25% travel time vs standard routing
+ */
+export function calculateTimeSaved(shipments: Shipment[]): number {
+    const deliveredShipments = shipments.filter(s => s.status === 'delivered' || s.status === 'in-transit');
+
+    return deliveredShipments.reduce((total, shipment) => {
+        const estimatedTime = parseInt(shipment.estArrival);
+        // Assume standard routing would take 20% longer
+        const timeSaved = estimatedTime * 0.20;
+        return total + timeSaved;
+    }, 0);
+}
+
+/**
+ * Calculate delivery success rate
+ */
+export function calculateSuccessRate(shipments: Shipment[]): number {
+    if (shipments.length === 0) return 100;
+
+    const successfulDeliveries = shipments.filter(
+        s => s.status === 'delivered' || s.status === 'in-transit'
+    ).length;
+
+    return (successfulDeliveries / shipments.length) * 100;
+}
+
+/**
+ * Get count of critical deliveries
+ */
+export function getCriticalDeliveriesCount(shipments: Shipment[]): number {
+    return shipments.filter(s => s.cargo.priority === 'critical').length;
+}
