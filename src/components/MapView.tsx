@@ -176,19 +176,32 @@ const MapView = React.memo(function MapView({
                         </Popup>
                     </CircleMarker>
 
-                    {/* Destination marker */}
-                    <CircleMarker
-                        center={shipment.destination.position}
-                        radius={isSelected ? 10 : 8}
-                        pathOptions={destinationOptions}
+                    {/* Destination marker - Pin to show where route is heading */}
+                    <Marker
+                        position={shipment.destination.position}
+                        icon={new L.Icon({
+                            iconUrl: 'data:image/svg+xml;base64,' + btoa(`
+                                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="40" viewBox="0 0 24 30">
+                                    <path d="M12 0C7.589 0 4 3.589 4 8c0 6 8 14 8 14s8-8 8-14c0-4.411-3.589-8-8-8z" 
+                                          fill="${color}" stroke="white" stroke-width="1.5"/>
+                                    <circle cx="12" cy="8" r="3" fill="white"/>
+                                </svg>
+                            `),
+                            iconSize: [32, 40],
+                            iconAnchor: [16, 40],
+                            popupAnchor: [0, -40],
+                        })}
                     >
                         <Popup>
                             <div className="p-2">
                                 <p className="text-xs font-mono text-gray-600 mb-1">Destination</p>
                                 <p className="font-bold text-sm">{shipment.destination.name}</p>
+                                <p className="text-xs text-gray-500 mt-1">
+                                    {shipment.cargo.description}
+                                </p>
                             </div>
                         </Popup>
-                    </CircleMarker>
+                    </Marker>
 
                     {/* Shipment info marker (midpoint) */}
                     <Marker position={midpoint} icon={shipmentIcon}>
