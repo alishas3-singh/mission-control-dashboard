@@ -344,6 +344,7 @@ const MapView = React.memo(function MapView({
             </MapContainer>
 
             <LiveGridIndicator />
+            <MapLegend />
         </div>
     );
 });
