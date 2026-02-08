@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Shield, Search, X } from 'lucide-react';
+import { Heart, Search, X } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import type { Hospital, Shipment } from '@/lib/cargo-data';
 
@@ -60,9 +60,9 @@ export default function Navbar({
     return (
         <nav className="fixed top-0 left-0 right-0 w-full h-16 bg-black/80 backdrop-blur-xl border-b border-white/5 z-[2000] px-10 flex items-center justify-between">
             <Link href="/" className="flex items-center gap-3">
-                <Shield className="w-5 h-5 text-[#00f5ff]" />
+                <Heart className="w-5 h-5 text-[#ff3131]" />
                 <span className="font-black text-sm tracking-wider uppercase italic text-white">
-                    Mission Control
+                    Life is On
                 </span>
             </Link>
 
