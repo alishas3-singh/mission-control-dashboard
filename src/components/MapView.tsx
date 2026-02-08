@@ -56,6 +56,64 @@ function LiveGridIndicator() {
     );
 }
 
+// Component to show color legend
+function MapLegend() {
+    const [isOpen, setIsOpen] = React.useState(false);
+
+    return (
+        <div className="absolute bottom-4 right-4 z-[1000]">
+            {/* Legend popup */}
+            {isOpen && (
+                <div className="mb-2 bg-[#0a0a0a]/95 backdrop-blur-xl border border-white/10 rounded-2xl p-4 min-w-[200px]">
+                    <h4 className="text-xs font-bold text-white mb-3 uppercase tracking-wider">Shipment Types</h4>
+                    <div className="space-y-2">
+                        <div className="flex items-center gap-2">
+                            <div className="w-3 h-3 rounded-full" style={{ backgroundColor: '#ff3131' }} />
+                            <span className="text-xs text-white/80">Blood</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <div className="w-3 h-3 rounded-full" style={{ backgroundColor: '#ff006e' }} />
+                            <span className="text-xs text-white/80">Organs</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <div className="w-3 h-3 rounded-full" style={{ backgroundColor: '#00f5ff' }} />
+                            <span className="text-xs text-white/80">Equipment</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <div className="w-3 h-3 rounded-full" style={{ backgroundColor: '#7209b7' }} />
+                            <span className="text-xs text-white/80">Medication</span>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Info button */}
+            <button
+                onClick={() => setIsOpen(!isOpen)}
+                className="bg-[#0a0a0a]/90 backdrop-blur-xl border border-white/10 rounded-full w-10 h-10 flex items-center justify-center hover:border-[#00f5ff]/50 transition-all hover:scale-110"
+                aria-label="Show legend"
+            >
+                <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="text-[#00f5ff]"
+                >
+                    <circle cx="12" cy="12" r="10" />
+                    <path d="M12 16v-4" />
+                    <path d="M12 8h.01" />
+                </svg>
+            </button>
+        </div>
+    );
+}
+
 interface MapViewProps {
     hospitals: Hospital[];
     shipments: Shipment[];
