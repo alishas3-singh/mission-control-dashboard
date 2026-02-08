@@ -47,7 +47,7 @@ function MapFix() {
 // Component to show LIVE GRID status
 function LiveGridIndicator() {
     return (
-        <div className="absolute top-4 right-4 z-[1000] bg-[#0a0a0a]/90 backdrop-blur-xl border border-white/10 rounded-2xl px-4 py-2 flex items-center gap-2">
+        <div className="absolute top-4 left-4 z-[1000] bg-[#0a0a0a]/90 backdrop-blur-xl border border-white/10 rounded-2xl px-4 py-2 flex items-center gap-2">
             <div className="w-2 h-2 bg-[#00f5ff] rounded-full animate-pulse" />
             <span className="font-mono text-[10px] uppercase tracking-widest text-[#00f5ff]">
                 Live Grid
