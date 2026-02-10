@@ -162,7 +162,7 @@ export function getCargoColor(type: Cargo['type']): string {
         case 'blood':
             return '#ff3131'; // Red
         case 'organs':
-            return '#ff006e'; // Magenta
+            return '#22c55e'; // Green
         case 'equipment':
             return '#00f5ff'; // Cyan
         case 'medication':

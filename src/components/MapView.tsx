@@ -72,7 +72,7 @@ function MapLegend() {
                             <span className="text-xs text-white/80">Blood</span>
                         </div>
                         <div className="flex items-center gap-2">
-                            <div className="w-3 h-3 rounded-full" style={{ backgroundColor: '#ff006e' }} />
+                            <div className="w-3 h-3 rounded-full" style={{ backgroundColor: '#22c55e' }} />
                             <span className="text-xs text-white/80">Organs</span>
                         </div>
                         <div className="flex items-center gap-2">
