@@ -7,13 +7,8 @@ export function isDaytime(): boolean {
 }
 
 export function getMapTileUrl(): string {
-    if (isDaytime()) {
-        // Light CartoDB Voyager tiles for daytime
-        return 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png';
-    } else {
-        // Dark CartoDB tiles for nighttime
-        return 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png';
-    }
+    // Always use light CartoDB Voyager tiles for a white background (better visibility)
+    return 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png';
 }
 
 export function getMapAttribution(): string {
