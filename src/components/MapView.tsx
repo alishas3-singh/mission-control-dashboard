@@ -184,12 +184,11 @@ const MapView = React.memo(function MapView({
             const color = getCargoColor(shipment.cargo.type);
             const isSelected = selectedShipment === shipment.id;
 
-            // Memoize path options
+            // Route line options - solid red thick lines for traffic visibility
             const polylineOptions = {
-                color: color,
-                weight: isSelected ? 4 : 3,
-                opacity: isSelected ? 0.9 : 0.6,
-                dashArray: '10, 10',
+                color: '#ff3131',
+                weight: isSelected ? 6 : 5,
+                opacity: isSelected ? 1.0 : 0.8,
             };
 
             const originOptions = {
