@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { X, ArrowRight } from 'lucide-react';
 
 interface OnboardingStep {
@@ -37,69 +37,92 @@ const steps: OnboardingStep[] = [
     },
 ];
 
+const TOOLTIP_WIDTH = 400;
+const TOOLTIP_HEIGHT = 220;
+const VIEWPORT_PADDING = 16;
+
 export default function Onboarding() {
     const [currentStep, setCurrentStep] = useState(0);
     const [isVisible, setIsVisible] = useState(false);
     const [tooltipPosition, setTooltipPosition] = useState({ top: 0, left: 0 });
 
     useEffect(() => {
-        // Check if user has seen tour before
-        const hasSeenTour = localStorage.getItem('mission-control-tour-complete');
+        // Use sessionStorage so tour shows once per session (not permanently hidden)
+        const hasSeenTour = sessionStorage.getItem('mission-control-tour-complete');
         if (!hasSeenTour) {
-            // Small delay so elements load
-            setTimeout(() => setIsVisible(true), 1500);
+            // Longer delay to ensure all page elements (map, cards, etc.) have rendered
+            const timer = setTimeout(() => setIsVisible(true), 2500);
+            return () => clearTimeout(timer);
         }
+    }, []);
+
+    // Clamp position to keep tooltip within viewport
+    const clampPosition = useCallback((top: number, left: number) => {
+        const maxLeft = window.innerWidth - TOOLTIP_WIDTH - VIEWPORT_PADDING;
+        const maxTop = window.innerHeight - TOOLTIP_HEIGHT - VIEWPORT_PADDING;
+        return {
+            top: Math.max(VIEWPORT_PADDING, Math.min(top, maxTop)),
+            left: Math.max(VIEWPORT_PADDING, Math.min(left, maxLeft)),
+        };
     }, []);
 
     useEffect(() => {
         if (!isVisible) return;
 
+        let retryTimer: NodeJS.Timeout | null = null;
+
         const updatePosition = () => {
             const step = steps[currentStep];
             if (step.target === 'body') {
-                // Center of screen
-                setTooltipPosition({
-                    top: window.innerHeight / 2 - 100,
-                    left: window.innerWidth / 2 - 200,
-                });
+                setTooltipPosition(clampPosition(
+                    window.innerHeight / 2 - TOOLTIP_HEIGHT / 2,
+                    window.innerWidth / 2 - TOOLTIP_WIDTH / 2,
+                ));
                 return;
             }
 
             const element = document.querySelector(step.target);
-            if (element) {
-                const rect = element.getBoundingClientRect();
-                const placement = step.placement || 'bottom';
-
-                let top = 0;
-                let left = 0;
-
-                switch (placement) {
-                    case 'top':
-                        top = rect.top - 180;
-                        left = rect.left + rect.width / 2 - 200;
-                        break;
-                    case 'bottom':
-                        top = rect.bottom + 20;
-                        left = rect.left + rect.width / 2 - 200;
-                        break;
-                    case 'left':
-                        top = rect.top + rect.height / 2 - 80;
-                        left = rect.left - 420;
-                        break;
-                    case 'right':
-                        top = rect.top + rect.height / 2 - 80;
-                        left = rect.right + 20;
-                        break;
-                }
-
-                setTooltipPosition({ top, left });
+            if (!element) {
+                // Element not found yet — retry after a short delay
+                retryTimer = setTimeout(updatePosition, 500);
+                return;
             }
+
+            const rect = element.getBoundingClientRect();
+            const placement = step.placement || 'bottom';
+
+            let top = 0;
+            let left = 0;
+
+            switch (placement) {
+                case 'top':
+                    top = rect.top - TOOLTIP_HEIGHT - 20;
+                    left = rect.left + rect.width / 2 - TOOLTIP_WIDTH / 2;
+                    break;
+                case 'bottom':
+                    top = rect.bottom + 20;
+                    left = rect.left + rect.width / 2 - TOOLTIP_WIDTH / 2;
+                    break;
+                case 'left':
+                    top = rect.top + rect.height / 2 - TOOLTIP_HEIGHT / 2;
+                    left = rect.left - TOOLTIP_WIDTH - 20;
+                    break;
+                case 'right':
+                    top = rect.top + rect.height / 2 - TOOLTIP_HEIGHT / 2;
+                    left = rect.right + 20;
+                    break;
+            }
+
+            setTooltipPosition(clampPosition(top, left));
         };
 
         updatePosition();
         window.addEventListener('resize', updatePosition);
-        return () => window.removeEventListener('resize', updatePosition);
-    }, [currentStep, isVisible]);
+        return () => {
+            window.removeEventListener('resize', updatePosition);
+            if (retryTimer) clearTimeout(retryTimer);
+        };
+    }, [currentStep, isVisible, clampPosition]);
 
     const handleNext = () => {
         if (currentStep < steps.length - 1) {
@@ -114,7 +137,7 @@ export default function Onboarding() {
     };
 
     const handleComplete = () => {
-        localStorage.setItem('mission-control-tour-complete', 'true');
+        sessionStorage.setItem('mission-control-tour-complete', 'true');
         setIsVisible(false);
     };
 
@@ -124,12 +147,15 @@ export default function Onboarding() {
 
     return (
         <>
-            {/* Dark overlay */}
-            <div className="fixed inset-0 bg-black/70 z-[9998] pointer-events-none" />
+            {/* Dark overlay — clickable to dismiss */}
+            <div
+                className="fixed inset-0 bg-black/70 z-[9998]"
+                onClick={handleSkip}
+            />
 
             {/* Tooltip */}
             <div
-                className="fixed z-[9999] w-[400px] bg-[#1a1a1a] border border-[#00f5ff]/30 rounded-2xl p-6 shadow-2xl shadow-[#00f5ff]/20"
+                className="fixed z-[9999] w-[400px] bg-[#1a1a1a] border border-[#00f5ff]/30 rounded-2xl p-6 shadow-2xl shadow-[#00f5ff]/20 transition-all duration-300 ease-out"
                 style={{
                     top: `${tooltipPosition.top}px`,
                     left: `${tooltipPosition.left}px`,
@@ -178,10 +204,10 @@ export default function Onboarding() {
                         <div
                             key={index}
                             className={`h-1.5 rounded-full transition-all ${index === currentStep
-                                    ? 'w-6 bg-[#00f5ff]'
-                                    : index < currentStep
-                                        ? 'w-1.5 bg-[#00f5ff]/50'
-                                        : 'w-1.5 bg-white/20'
+                                ? 'w-6 bg-[#00f5ff]'
+                                : index < currentStep
+                                    ? 'w-1.5 bg-[#00f5ff]/50'
+                                    : 'w-1.5 bg-white/20'
                                 }`}
                         />
                     ))}
