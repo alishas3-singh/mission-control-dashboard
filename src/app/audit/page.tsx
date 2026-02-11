@@ -52,9 +52,13 @@ export default function AuditPage() {
 
                 {/* AI Explanation Cards */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                    {/* SHAP Waterfall Plot */}
+                    {/* SHAP Waterfall Plot - Live Data */}
                     <div>
-                        <ShapPlot />
+                        <ShapPlot
+                            weatherImpact={weather.impactFactor}
+                            trafficCongestion={traffic.congestionLevel}
+                            severity={criticalShipment?.severity ?? 8.5}
+                        />
                     </div>
 
                     {/* Decision Tree - Live Data */}
