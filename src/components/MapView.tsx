@@ -317,23 +317,38 @@ const MapView = React.memo(function MapView({
             <MapContainer
                 center={center}
                 zoom={13}
-                style={{ height: '100%', width: '100%', background: '#0a0a0a' }}
+                style={{ height: '100%', width: '100%', background: '#f8f8f8' }}
                 zoomControl={false}
                 scrollWheelZoom={true}
                 dragging={true}
                 doubleClickZoom={true}
                 touchZoom={true}
+                zoomSnap={0.5}
+                zoomDelta={0.5}
+                wheelDebounceTime={80}
+                wheelPxPerZoomLevel={120}
+                zoomAnimation={true}
+                fadeAnimation={true}
+                markerZoomAnimation={true}
+                inertia={true}
+                inertiaDeceleration={3000}
+                inertiaMaxSpeed={1500}
+                easeLinearity={0.25}
             >
                 <MapFix />
 
                 {/* Add zoom control on the left side */}
                 <ZoomControl position="topleft" />
 
-                {/* Dynamic Day/Night tiles */}
+                {/* Light tiles */}
                 <TileLayer
                     attribution={getMapAttribution()}
                     url={mapTileUrl}
                     key={mapTileUrl}
+                    maxZoom={19}
+                    keepBuffer={5}
+                    updateWhenZooming={false}
+                    updateWhenIdle={true}
                 />
 
                 {/* Hospital Markers */}
