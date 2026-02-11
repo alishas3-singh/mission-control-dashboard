@@ -127,14 +127,15 @@ export async function fetchTraffic(lat: number = 47.6062, lon: number = -122.332
 
 /**
  * Calculate Life-Cost Index
- * Formula: LC = (Time × Weather) + Severity
+ * Formula: LC = (Time × Weather × (1 + Traffic)) + Severity
  */
 export function calculateLifeCost(
     time: number,
     weatherImpact: number,
+    trafficCongestion: number,
     severity: number
 ): number {
-    return (time * weatherImpact) + severity;
+    return (time * weatherImpact * (1 + trafficCongestion)) + severity;
 }
 
 /**

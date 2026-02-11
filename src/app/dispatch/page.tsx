@@ -140,6 +140,7 @@ export default function DispatchPage() {
                                 <LifeCostCard
                                     time={parseInt(criticalShipment.estArrival)}
                                     weather={weather.impactFactor}
+                                    traffic={traffic.congestionLevel}
                                     severity={criticalShipment.severity}
                                 />
                             </div>
