@@ -1,10 +1,39 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import { Brain, Activity } from 'lucide-react';
 import ShapPlot from '@/components/ShapPlot';
 import DecisionTree from '@/components/DecisionTree';
+import { fetchWeather, fetchTraffic } from '@/lib/api';
+import { ACTIVE_SHIPMENTS } from '@/lib/cargo-data';
 
 export default function AuditPage() {
+    const [weather, setWeather] = useState({ temperature: 15, impactFactor: 0.3, weathercode: 0 });
+    const [traffic, setTraffic] = useState({ congestionLevel: 0.25, currentSpeed: 45, freeFlowSpeed: 60 });
+
+    // Get the highest severity shipment
+    const activeShipments = ACTIVE_SHIPMENTS.filter(s => s.status === 'in-transit');
+    const criticalShipment = activeShipments.reduce(
+        (max, s) => (s.severity > max.severity ? s : max),
+        activeShipments[0]
+    );
+
+    useEffect(() => {
+        async function loadLiveData() {
+            const [weatherData, trafficData] = await Promise.all([
+                fetchWeather(),
+                fetchTraffic(),
+            ]);
+            setWeather(weatherData);
+            setTraffic(trafficData);
+        }
+        loadLiveData();
+
+        // Refresh every 5 minutes
+        const interval = setInterval(loadLiveData, 5 * 60 * 1000);
+        return () => clearInterval(interval);
+    }, []);
+
     return (
         <main className="min-h-screen bg-[#0a0a0a] pt-16 p-8">
             <div className="max-w-7xl mx-auto space-y-8">
@@ -28,9 +57,13 @@ export default function AuditPage() {
                         <ShapPlot />
                     </div>
 
-                    {/* Decision Tree */}
+                    {/* Decision Tree - Live Data */}
                     <div>
-                        <DecisionTree />
+                        <DecisionTree
+                            weatherImpact={weather.impactFactor}
+                            trafficCongestion={traffic.congestionLevel}
+                            severity={criticalShipment?.severity ?? 8.5}
+                        />
                     </div>
                 </div>
 
@@ -53,7 +86,7 @@ export default function AuditPage() {
                             <div className="mt-4 flex items-center gap-2">
                                 <div className="w-2 h-2 bg-[#00f5ff] rounded-full animate-pulse" />
                                 <span className="font-mono text-[10px] uppercase tracking-widest text-[#00f5ff]">
-                                    Model Active
+                                    Model Active — Live Data Connected
                                 </span>
                             </div>
                         </div>
