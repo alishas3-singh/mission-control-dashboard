@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import dynamic from 'next/dynamic';
-import { fetchWeather, fetchTraffic } from '@/lib/api';
+import { fetchWeather, fetchTraffic, getWeatherDescription } from '@/lib/api';
 import { ACTIVE_SHIPMENTS, HOSPITALS, type Hospital, type Shipment } from '@/lib/cargo-data';
 import { Activity, Cloud, Navigation, Package, Building2 } from 'lucide-react';
 import LifeCostCard from '@/components/LifeCostCard';
@@ -25,7 +25,7 @@ const MapView = dynamic(() => import('@/components/MapView'), {
 });
 
 export default function DispatchPage() {
-    const [weather, setWeather] = useState({ temperature: 15, impactFactor: 0.3 });
+    const [weather, setWeather] = useState({ temperature: 15, impactFactor: 0.3, weathercode: 0 });
     const [traffic, setTraffic] = useState({ congestionLevel: 0.25 });
     const [loading, setLoading] = useState(true);
 
@@ -154,6 +154,7 @@ export default function DispatchPage() {
                                     shipment={criticalShipment}
                                     weatherImpact={weather.impactFactor}
                                     congestionLevel={traffic.congestionLevel}
+                                    weatherDescription={getWeatherDescription(weather.weathercode)}
                                 />
                             </div>
                         )}

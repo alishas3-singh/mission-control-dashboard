@@ -25,7 +25,7 @@ export interface Shipment {
     status: 'in-transit' | 'delivered' | 'pending';
     estArrival: string; // Time in minutes
     severity: number; // Medical severity score 0-10
-    vehicleType: 'ambulance' | 'helicopter' | 'drone';
+    vehicleType: 'ambulance' | 'medical-van';
 }
 
 // Seattle area hospitals
@@ -101,7 +101,7 @@ export const ACTIVE_SHIPMENTS: Shipment[] = [
         status: 'in-transit',
         estArrival: '8 min',
         severity: 10,
-        vehicleType: 'helicopter',
+        vehicleType: 'ambulance',
     },
     {
         id: 'S003',
@@ -152,7 +152,7 @@ export const ACTIVE_SHIPMENTS: Shipment[] = [
         status: 'pending',
         estArrival: '25 min',
         severity: 6.5,
-        vehicleType: 'drone',
+        vehicleType: 'medical-van',
     },
 ];
 
@@ -177,10 +177,8 @@ export function getVehicleIcon(type: Shipment['vehicleType']): string {
     switch (type) {
         case 'ambulance':
             return '🚑';
-        case 'helicopter':
-            return '🚁';
-        case 'drone':
-            return '🛸';
+        case 'medical-van':
+            return '🚐';
         default:
             return '🚑';
     }
