@@ -114,12 +114,20 @@ function MapLegend() {
     );
 }
 
+// Get route color based on traffic congestion level
+function getTrafficColor(congestion: number): string {
+    if (congestion >= 0.6) return '#ff3131';  // Red - high traffic
+    if (congestion >= 0.3) return '#f59e0b';  // Amber/Yellow - medium traffic
+    return '#22c55e';                          // Green - low/no traffic
+}
+
 interface MapViewProps {
     hospitals: Hospital[];
     shipments: Shipment[];
     center: [number, number];
     selectedHospital?: string | null;
     selectedShipment?: string | null;
+    congestionLevel?: number;
 }
 
 const MapView = React.memo(function MapView({
@@ -127,7 +135,8 @@ const MapView = React.memo(function MapView({
     shipments,
     center,
     selectedHospital,
-    selectedShipment
+    selectedShipment,
+    congestionLevel = 0.25
 }: MapViewProps) {
     const [mounted, setMounted] = useState(false);
     const [mapTileUrl, setMapTileUrl] = useState(getMapTileUrl());
@@ -184,9 +193,10 @@ const MapView = React.memo(function MapView({
             const color = getCargoColor(shipment.cargo.type);
             const isSelected = selectedShipment === shipment.id;
 
-            // Route line options - solid red thick lines for traffic visibility
+            // Route line color based on traffic congestion level
+            const trafficColor = getTrafficColor(congestionLevel);
             const polylineOptions = {
-                color: '#ff3131',
+                color: trafficColor,
                 weight: isSelected ? 6 : 5,
                 opacity: isSelected ? 1.0 : 0.8,
             };

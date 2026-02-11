@@ -129,6 +129,7 @@ export default function DispatchPage() {
                             center={[47.6205, -122.3321]}
                             selectedHospital={selectedHospital}
                             selectedShipment={selectedShipment}
+                            congestionLevel={traffic.congestionLevel}
                         />
 
                         {/* Live Clock Overlay */}
